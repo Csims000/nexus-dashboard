@@ -98,7 +98,33 @@ let modalSave=()=>{};
 function openModal(title,desc,body,saveFn){$("#modalTitle").textContent=title;$("#modalDesc").textContent=desc;$("#modalBody").innerHTML=body;modalSave=saveFn||(()=>{});$("#modalBackdrop").classList.add("open");const first=$("#modalBody input");if(first)first.focus()}
 function closeModal(){$("#modalBackdrop").classList.remove("open")}
 $("#cancelModal").onclick=closeModal;$("#modalBackdrop").addEventListener("click",e=>{if(e.target===$("#modalBackdrop"))closeModal()});$("#saveModal").onclick=()=>{modalSave();closeModal()};
-function openLinkModal(){openModal("Manage Quick Launch","Add a site shortcut. Use a full https:// address for the safest result.",'<div class="field"><label for="linkName">Shortcut name</label><input id="linkName" maxlength="24" placeholder="My website"></div><div class="field"><label for="linkUrl">Website URL</label><input id="linkUrl" type="url" placeholder="https://example.com"></div><div class="field"><label for="linkIcon">Icon letters (2 characters)</label><input id="linkIcon" maxlength="2" placeholder="NX"></div><p>Current shortcuts: '+links.map(l=>escapeHtml(l.name)).join(" · ")+'</p><div class="field"><label for="removeLink">Remove a shortcut (optional)</label><select id="removeLink" style="height:38px;background:#0b1220;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:0 9px"><option value="">Keep all shortcuts</option>'+links.map((l,i)=>'<option value="'+i+'">'+escapeHtml(l.name)+'</option>').join("")+'</select></div>',()=>{const rm=$("#removeLink").value;if(rm!==""){links.splice(Number(rm),1);save("nexus.links",links);renderLinks()}const name=$("#linkName").value.trim(),url=safeUrl($("#linkUrl").value.trim());if(name&&url){links.push({name,url,icon:($("#linkIcon").value.trim().toUpperCase()||name.slice(0,2).toUpperCase())});save("nexus.links",links);renderLinks();toast("Shortcut added.")}else if(name||$("#linkUrl").value.trim())toast("Enter both a name and a valid URL.");});
+function openLinkModal(){
+  const currentNames = links.map(l => escapeHtml(l.name)).join(" · ");
+  const options = links.map((l,i) => '<option value="' + i + '">' + escapeHtml(l.name) + '</option>').join("");
+  const body = '<div class="field"><label for="linkName">Shortcut name</label><input id="linkName" maxlength="24" placeholder="My website"></div>' +
+    '<div class="field"><label for="linkUrl">Website URL</label><input id="linkUrl" type="url" placeholder="https://example.com"></div>' +
+    '<div class="field"><label for="linkIcon">Icon letters (2 characters)</label><input id="linkIcon" maxlength="2" placeholder="NX"></div>' +
+    '<p>Current shortcuts: ' + currentNames + '</p>' +
+    '<div class="field"><label for="removeLink">Remove a shortcut (optional)</label><select id="removeLink" style="height:38px;background:#0b1220;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:0 9px"><option value="">Keep all shortcuts</option>' + options + '</select></div>';
+  openModal("Manage Quick Launch", "Add a site shortcut. Use a full https:// address for the safest result.", body, () => {
+    const removeValue = $("#removeLink").value;
+    if (removeValue !== "") {
+      links.splice(Number(removeValue), 1);
+      save("nexus.links", links);
+      renderLinks();
+    }
+    const name = $("#linkName").value.trim();
+    const url = safeUrl($("#linkUrl").value.trim());
+    if (name && url) {
+      links.push({name, url, icon: ($("#linkIcon").value.trim().toUpperCase() || name.slice(0, 2).toUpperCase())});
+      save("nexus.links", links);
+      renderLinks();
+      toast("Shortcut added.");
+    } else if (name || $("#linkUrl").value.trim()) {
+      toast("Enter both a name and a valid URL.");
+    }
+  });
+}
 $("#manageLaunch").onclick=openLinkModal;$("#addTask").onclick=()=>openModal("Add a priority","Keep it short so your dashboard stays tidy.",'<div class="field"><label for="taskName">Task</label><input id="taskName" maxlength="70" placeholder="What needs to get done?"></div><div class="field"><label for="taskDetail">Small note (optional)</label><input id="taskDetail" maxlength="80" placeholder="Due date, project, or next step"></div>',()=>{const title=$("#taskName").value.trim();if(!title)return toast("Enter a task first.");tasks.unshift({title,detail:$("#taskDetail").value.trim()||"Priority task",done:false});tasks=tasks.slice(0,8);save("nexus.tasks",tasks);renderTasks();toast("Priority added.")});
 $("#settingsBtn").onclick=()=>openModal("NEXUS settings","Personalize this browser's dashboard. These preferences are stored locally on this device.",'<div class="field"><label for="displayName">Display initial / profile label</label><input id="displayName" maxlength="24" value="'+escapeHtml(settings.displayName||"N")+'"></div><div class="field"><label for="themeSelect">Theme</label><select id="themeSelect" style="height:40px;background:#0b1220;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:0 10px"><option value="dark" '+(settings.theme==="dark"?"selected":"")+'>Midnight dark</option><option value="light" '+(settings.theme==="light"?"selected":"")+'>Light</option></select></div><div class="field"><label><input id="motionToggle" type="checkbox" '+(settings.reducedMotion?"checked":"")+' style="width:auto;height:auto;margin-right:8px">Reduce animations</label></div><div class="field"><label><input id="clockToggle" type="checkbox" '+(settings.clock24?"checked":"")+' style="width:auto;height:auto;margin-right:8px">Use 24-hour clock</label></div>',()=>{settings={...settings,displayName:$("#displayName").value.trim()||"N",theme:$("#themeSelect").value,reducedMotion:$("#motionToggle").checked,clock24:$("#clockToggle").checked};save("nexus.settings",settings);applySettings();toast("Settings saved on this device.")});
 $("#themeBtn").onclick=()=>{settings.theme=settings.theme==="light"?"dark":"light";save("nexus.settings",settings);applySettings();toast(settings.theme==="light"?"Light theme enabled":"Midnight theme enabled")};
