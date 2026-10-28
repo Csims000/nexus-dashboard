@@ -95,7 +95,7 @@ function renderTasks(){const list=$("#mydayList");list.innerHTML="";tasks.slice(
 function updateClock(){const d=new Date();$("#clockTime").textContent=new Intl.DateTimeFormat(undefined,{hour:"2-digit",minute:"2-digit",hour12:!settings.clock24}).format(d);$("#clockDate").textContent=new Intl.DateTimeFormat(undefined,{weekday:"short",month:"short",day:"numeric"}).format(d);$("#dayLabel").textContent=new Intl.DateTimeFormat(undefined,{weekday:"long"}).format(d).toUpperCase()}
 function applySettings(){document.body.classList.toggle("light",settings.theme==="light");document.body.classList.toggle("reduced-motion",!!settings.reducedMotion);$("#avatar").textContent=(settings.displayName||"N").trim().slice(0,1).toUpperCase()||"N";updateClock()}
 let modalSave=()=>{};
-function openModal(title,desc,body,saveFn){$("#modalTitle").textContent=title;$("#modalDesc").textContent=desc;$("#modalBody").innerHTML=body;modalSave=saveFn||(()=>{});$("#modalBackdrop").classList.add("open");const first=$("#modalBody input");if(first)first.focus()}
+function openModal(title,desc,body,saveFn){$("#saveModal").style.display="";$("#modalTitle").textContent=title;$("#modalDesc").textContent=desc;$("#modalBody").innerHTML=body;modalSave=saveFn||(()=>{});$("#modalBackdrop").classList.add("open");const first=$("#modalBody input");if(first)first.focus()}
 function closeModal(){$("#modalBackdrop").classList.remove("open")}
 $("#cancelModal").onclick=closeModal;$("#modalBackdrop").addEventListener("click",e=>{if(e.target===$("#modalBackdrop"))closeModal()});$("#saveModal").onclick=()=>{modalSave();closeModal()};
 function openLinkModal(){
